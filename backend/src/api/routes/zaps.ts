@@ -347,10 +347,3 @@ zapsRouter.get("/history/:id", authMiddleware, async(req:any, res:Response)=>{
     }
 })
 
-zapsRouter.get("/health", (req:any, res:any) => {
-    res.status(200).json({
-        status: "healthy",
-        service: "api-server/zapsrouter",
-        timestamp: new Date().toISOString(),
-    });
-});

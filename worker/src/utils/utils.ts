@@ -9,7 +9,6 @@ export function allConditionsPassed(allCondiitons: Conditons[], metadata:any):Bo
     for(const condtion of allCondiitons){
         const {field, condition:conditionType, value} = condtion;
         const triggerValue = metadata[field];
-        console.log(triggerValue);
         let currentCheck = false;
         switch (conditionType){
             case "EQUALS":
@@ -40,10 +39,10 @@ export function allConditionsPassed(allCondiitons: Conditons[], metadata:any):Bo
 
 export function replaceFunction(input: string, metadata: any): string {
     const regex = /\{\{data\.([\w.]+?)\}\}/g;
-    console.log("Input: ",input);
+    // console.log("Input: ",input);
     return input.replace(regex, (match, key)=>{
-        console.log("Key: ", key, " Value: ", metadata[key], "value2: ", metadata[`'${key}'`]);
-        console.log("match: ", match);
+        // console.log("Key: ", key, " Value: ", metadata[key], "value2: ", metadata[`'${key}'`]);
+        // console.log("match: ", match);
         if(metadata.hasOwnProperty(key)) return metadata[key];
         return match;
     }

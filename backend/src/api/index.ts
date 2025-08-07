@@ -7,12 +7,35 @@ import { userRouter } from "./routes/users";
 import { zapsRouter } from "./routes/zaps";
 dotenv.config();
 
+let totalRequest = 0;
+const serverStartTime = Date.now();
+
 const app = express();
-app.use(cors({
-    origin: ['https://zapflow.souvikg.xyz','https://zapflow-one.vercel.app'], // allow only your frontend
-    credentials: true // if you're using cookies or Authorization headers
-  }));
 app.use(express.json())
+
+app.use(cors({
+    origin: ['https://zapflow.souvikg.xyz','https://zapflow-one.vercel.app'], 
+    credentials: true ,
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+
+
+app.use((req:any, res:any, next: any)=>{
+  totalRequest++;
+  next();
+})
+
+app.use("/api/v1/health", (req:any,res:any)=>{
+  const upTime = (Date.now() - serverStartTime)/1000;
+  const rps = upTime > 0 ? totalRequest/upTime : 0;
+
+  return res.status(200).json({
+    status: "healthy",
+    Uptime: `${upTime/3600} hours `,
+    Request_per_second:rps
+  })
+})
+
 
 app.use("/api/v1/zaps", zapsRouter);
 app.use("/api/v1/", typesRouter);
