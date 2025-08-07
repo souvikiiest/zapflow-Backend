@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ZapRunStatus{
+  PENDING
+  SUCCESS
+  ERROR
+}
+
+enum ZapRunOutboxStatus{
+  PENDING
+  SUCCESS
+  ERROR
+}
+
+model User {
+  id        String    @id @default(cuid())
+  name      String
+  email     String @unique
+  password  String
+  zaps      Zap[]
+}
+
+model Zap {
+  id        String    @id @default(cuid())
+  userId    String    
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trigger   Trigger? 
+  actions   Action[]
+  zapRuns   ZapRun[]
+  active Boolean @default(true)
+}
+
+model Trigger {
+  id                 String           @id @default(cuid())
+  zapId              String           @unique 
+  zap                Zap              @relation(fields: [zapId], references: [id], onDelete: Cascade)
+  availableTriggerId String
+  availableTrigger   AvailableTrigger @relation(fields: [availableTriggerId], references: [id])
+  metadata           Json             @default("{}")
+  schedule String? 
+}
+
+model AvailableTrigger {
+  id        String    @id @default(cuid()) 
+  name      String
+  image     String
+  triggers  Trigger[] 
+}
+
+model Action {
+  id                String           @id @default(cuid())
+  zapId             String
+  zap               Zap              @relation(fields: [zapId], references: [id], onDelete: Cascade)
+  availableActionId String
+  availableAction   AvailableAction  @relation(fields: [availableActionId], references: [id])
+  sortingOrder      Int              @default(0)
+  metadata          Json             @default("{}")
+  filter Filter?
+}
+
+model Filter{
+  id    String @id @default(cuid())
+  actionId String  @unique
+  action Action @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  conditions Json
+}
+
+model AvailableAction {
+  id      String   @id @default(cuid()) 
+  name    String
+  image   String
+  actions Action[]
+}
+
+model ZapRun {
+  id           String         @id @default(cuid()) 
+  zapId        String
+  zap          Zap            @relation(fields: [zapId], references: [id], onDelete: Cascade)
+  metadata     Json           @default("{}")
+  outboxItems  ZapRunOutbox[]
+  status ZapRunStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  completedAt DateTime?
+  errorMessage String?
+}
+
+model ZapRunOutbox {
+  id        String  @id @default(cuid())
+  zapRunId  String
+  zapRun    ZapRun  @relation(fields: [zapRunId], references: [id], onDelete: Cascade) 
+  processed Boolean @default(false)
+  status ZapRunOutboxStatus @default(PENDING)
+  createdAt DateTime @default(now())
+  errorMessage String?
+  completedAt DateTime?
+}

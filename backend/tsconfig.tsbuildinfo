@@ -1,0 +1,1 @@
+{"root":["./prisma/seed.ts","./src/api/index.ts","./src/api/middleware/auth.ts","./src/api/routes/types.ts","./src/api/routes/users.ts","./src/api/routes/zaps.ts","./src/scheduler/index.ts","./src/scheduler/scheduler.ts"],"errors":true,"version":"5.8.3"}
