@@ -52,9 +52,10 @@ async function runZap(zapId: string, zapRunId: string, metadata: any): Promise<b
             // ]
             if (action.filter?.conditions && Array.isArray(action.filter.conditions)) {
                 const allCondiitons: any = action.filter.conditions;
-                if (!allConditionsPassed(allCondiitons, metadata)) {
-                    logError(zapRunId, "Filter conditions were not met");
-                    console.log("Filter conditions were not met")
+                const filterResult = allConditionsPassed(allCondiitons, metadata);
+                if (!filterResult.passed) {
+                    logError(zapRunId, filterResult.message || "Filter conditions were not met");
+                    console.log("Error: ",filterResult.message);
                     return true; // because it got cancelled
                 }
             }

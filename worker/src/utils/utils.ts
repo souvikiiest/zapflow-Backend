@@ -4,11 +4,24 @@ interface Conditons{
     condition:string
     value:string
 }
-export function allConditionsPassed(allCondiitons: Conditons[], metadata:any):Boolean{
-    let allPassed = true;
+
+interface CondtionResult{
+    passed: boolean
+    message?:string
+}
+
+export function allConditionsPassed(allCondiitons: Conditons[], metadata:any):CondtionResult{
+
     for(const condtion of allCondiitons){
         const {field, condition:conditionType, value} = condtion;
         const triggerValue = metadata[field];
+        if(triggerValue == null || triggerValue == undefined){
+            return{
+                passed: false,
+                message: `Field ${field} was not found in metadata`
+            };
+        }
+        console.log("TriggerValue: ",triggerValue); 
         let currentCheck = false;
         switch (conditionType){
             case "EQUALS":
@@ -30,11 +43,13 @@ export function allConditionsPassed(allCondiitons: Conditons[], metadata:any):Bo
                 break;
         }
         if(!currentCheck){
-            allPassed = false;
-            break;
+            return{
+                passed:false,
+                message: `Field: ${field} with value: ${triggerValue} failed against conditon: ${conditionType} with value ${value}`
+            }
         }
     }
-    return allPassed;
+    return {passed:true};
 }   
 
 export function replaceFunction(input: string, metadata: any): string {
